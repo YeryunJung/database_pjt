@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
-from .models import Movie
+from django.views.decorators.http import require_POST
+from .models import Movie, Comment
 from .forms import MovieForm, CommentForm
 
 
@@ -64,3 +65,35 @@ def update(request, pk):
         'form': form,
     }
     return render(request, 'movies/update.html', context)
+
+def comments_create(request, pk):
+    if not request.user.is_authenticated:
+        return redirect('accounts:login')
+
+    movie = Movie.objects.get(pk=pk)
+    comment_form = CommentForm(request.POST)
+    if comment_form.is_valid():
+        comment = comment_form.save(commit=False)
+        comment.content = movie
+        comment.user = request.user
+        comment.save()
+    return redirect('articles:detail', movie.pk)
+
+def comments_delete(request, pk, comment_pk):
+    if not request.user.is_authenticated:
+        return redirect('accounts:login')
+    comment = Comment.objects.get(pk=comment_pk)
+    if request.user == comment.user:
+        comment.delete()
+    return redirect('movies:detail', pk)
+
+@require_POST
+def likes(request, movie_pk):
+    if request.user.is_authenticated:
+        movie = Movie.objects.get(pk=movie_pk)
+        if movie.like_users.filter(pk=request.user.pk).exists():
+            movie.like_users.remove(request.user)
+        else:
+            movie.like_users.add(request.user)
+        return redirect('movies:index')
+    return redirect('accounts:login')
