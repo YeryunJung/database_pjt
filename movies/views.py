@@ -49,13 +49,16 @@ def delete(request, pk):
 
 def update(request, pk):
     movie = Movie.objects.get(pk=pk)
-    if request.method == 'POST':
-        form = MovieForm(request.POST, instance=movie)
-        if form.is_valid():
-            form.save()
-            return redirect('movies:detail', movie.pk)
+    if request.user == movie.user:
+        if request.method == 'POST':
+            form = MovieForm(request.POST, instance=movie)
+            if form.is_valid():
+                form.save()
+                return redirect('movies:detail', movie.pk)
+        else:
+            form = MovieForm(instance=movie)
     else:
-        form = MovieForm(instance=movie)
+        return redirect('movies:detail', movie.pk)
     context = {
         'movie': movie,
         'form': form,
