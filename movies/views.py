@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_POST
-from .models import Movie, Comment, Movie_like_users
+from .models import Movie, Comment
 from .forms import MovieForm, CommentForm
 
 
@@ -13,6 +13,9 @@ def index(request):
 
 
 def create(request):
+    if not request.user.is_authenticated:
+        return redirect('accounts:login')
+    
     if request.method == 'POST':
         form = MovieForm(request.POST)
         if form.is_valid():
@@ -74,27 +77,26 @@ def comments_create(request, pk):
     comment_form = CommentForm(request.POST)
     if comment_form.is_valid():
         comment = comment_form.save(commit=False)
-        comment.content = movie
+        comment.movie = movie
         comment.user = request.user
         comment.save()
-    return redirect('articles:detail', movie.pk)
+    return redirect('movies:detail', movie.pk)
 
-def comments_delete(request, pk, comment_pk):
+def comments_delete(request, movie_pk, comment_pk):
     if not request.user.is_authenticated:
         return redirect('accounts:login')
     comment = Comment.objects.get(pk=comment_pk)
     if request.user == comment.user:
         comment.delete()
-    return redirect('movies:detail', pk)
+    return redirect('movies:detail', movie_pk)
 
 @require_POST
 def likes(request, movie_pk):
-    # if request.user.is_authenticated:
-    #     movie = Movie.objects.get(pk=movie_pk)
-    #     # movie_like_users = Movie_like_users.objects.get(pk=movie_pk)
-    #     # if movie.like_users.filter(pk=request.user.pk).exists():
-    #     #     movie.like_users.remove(request.user)
-    #     # else:
-    #     #     movie.like_users.add(request.user)
-    #     return redirect('movies:index')
+    if request.user.is_authenticated:
+        movie = Movie.objects.get(pk=movie_pk)
+        if movie.like_users.filter(pk=request.user.pk).exists():
+            movie.like_users.remove(request.user)
+        else:
+            movie.like_users.add(request.user)
+        return redirect('movies:index')
     return redirect('accounts:login')
