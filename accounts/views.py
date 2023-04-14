@@ -71,3 +71,25 @@ def change_password(request):
         form = PasswordChangeForm(request.user)
     context = {"form": form}
     return render(request, "accounts/change_password.html", context)
+
+
+@require_GET
+def profile(request, username):
+    member = get_user_model().objects.get(username=username)
+    context = {
+        "member": member,
+    }
+    return render(request, "accounts/profile.html", context)
+
+
+@require_POST
+def follow(request, user_pk):
+    if request.user.is_authenticated:
+        member = get_user_model().objects.get(pk=user_pk)
+        if member != request.user:
+            if member.followers.filter(pk=request.user.pk).exists():
+                member.followers.remove(request.user)
+            else:
+                member.followers.add(request.user)
+        return redirect("accounts:profile", member.username)
+    return redirect("accounts:login")
