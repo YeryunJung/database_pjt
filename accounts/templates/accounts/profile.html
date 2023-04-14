@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1> {{ member.username }}님의 프로필 </h1>
+<div>
+  팔로잉 : {{ member.followings.count }} | 팔로워 : {{ member.followers.count }}
+</div>
+<form action="{% url 'accounts:follow' member.pk %}" method="POST">
+  {% csrf_token %}
+  {% if request.user in member.followers.all %}
+    <button type="submit" class="btn btn-danger">unfollow :(</button>
+  {% else %}
+    <button type="submit" class="btn btn-primary">follow :)</button>
+  {% endif %}
+</form>
+
+<hr>
+
+<h5> {{ member.username }}'s 게시글 </h5>
+  {% for movie in member.movies_set.all %}
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title"> {{ movie.title }} </h5>
+      <p class="card-text">{{ movie.content }}</p>
+      <a href="{% url 'movies:detail' movie.pk %}" class="btn btn-primary">자세히 보기</a>
+    </div>
+  </div>
+  {% endfor %}
+  <hr><br><br>
+
+  <h5>{{ member.username }}님이 좋아한 게시글</h5>
+  {% for movie in member.like_movies.all %}
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title"> {{ movie.title }} </h5>
+      <p class="card-text">{{ movie.content }}</p>
+      <a href="{% url 'movies:detail' movie.pk %}">자세히 보기</a>
+    </div>
+  </div>
+  {% endfor %}
+  <hr><br><br>
+<a href="{% url 'movies:index' %}">돌아가기</a>
+{% endblock content %}
