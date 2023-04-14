@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from .models import Movie
-from .forms import MovieForm
+from .forms import MovieForm, CommentForm
 
 
 def index(request):
@@ -29,8 +29,12 @@ def create(request):
 
 def detail(request, pk):
     movie = Movie.objects.get(pk=pk)
+    comment_form = CommentForm()
+    comments = movie.comment_set.all()
     context = {
         'movie': movie,
+        'comment_form': comment_form,
+        'comments': comments,
     }
     return render(request, 'movies/detail.html', context)
 
