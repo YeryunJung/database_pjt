@@ -9,7 +9,7 @@
 </head>
 <body>
   <div id="nav">
-    {% comment %} {% if user.is_authenticated %}
+    {% if user.is_authenticated %}
       <h3>Hello, {{user}}</h3>
       <a href="{% url 'accounts:update' %}">회원 정보 수정</a>
       <form action="{% url 'accounts:logout' %}" method="POST">
@@ -24,10 +24,8 @@
     {% else %}
       <a href="{% url 'accounts:login' %}">Login</a>
       <a href="{% url 'accounts:signup' %}">Signup</a>
-    {% endif %} {% endcomment %}
+    {% endif %}
   </div>
-  <hr>
-  <h1>INDEX</h1>
 
   <div class="container">
     {% block content %}

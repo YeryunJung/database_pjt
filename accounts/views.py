@@ -42,7 +42,7 @@ def signup(request):
 
 
 @require_POST
-def withdrawal(request):
+def delete(request):
     request.user.delete()
     auth_logout(request)
     return redirect("movies:index")
