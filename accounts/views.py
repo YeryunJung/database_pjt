@@ -73,6 +73,7 @@ def change_password(request):
     return render(request, "accounts/change_password.html", context)
 
 
+@require_GET
 def profile(request, username):
     member = get_user_model().objects.get(username=username)
     context = {
